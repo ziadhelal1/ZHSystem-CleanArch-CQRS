@@ -41,6 +41,7 @@ public class RegisterCommandHandlerTests
         // Arrange
         var db = CreateDbContext();
 
+
         _passwordHasherMock
             .Setup(x => x.HashPassword(It.IsAny<User>(), It.IsAny<string>()))
             .Returns("hashed-password");
