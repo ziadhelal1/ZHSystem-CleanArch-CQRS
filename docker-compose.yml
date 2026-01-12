@@ -1,0 +1,36 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: school-sql-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Ziadhelal123456!
+    ports:
+      - "1433:1433"
+
+  seq:
+    image: datalust/seq:latest
+    container_name: school-seq
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=true
+    ports:
+      - "5341:80"
+    restart: always
+
+  api:
+    build:
+      context: .
+      dockerfile: School.Api/Dockerfile
+    container_name: school-api
+    depends_on:
+      - db
+      - seq
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=SchoolDb;User Id=sa;Password=Ziadhelal123456!;TrustServerCertificate=True
+      - Serilog__WriteTo__0__Name=Seq
+      - Serilog__WriteTo__0__Args__serverUrl=http://seq:80
+    ports:
+      - "8080:8080"
+    # التعديل هنا: نطلب من دوكر إعادة تشغيل الـ API تلقائياً إذا فشل الاتصال بالقاعدة أول مرة
+    restart: on-failure
